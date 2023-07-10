@@ -1,18 +1,15 @@
 package ru.kata.spring.boot_security.demo.model;
 
-import lombok.Data;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-@Data
 @Entity
 @Table(name = "User")
 public class User implements UserDetails {
@@ -38,14 +35,13 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String username;
 
-    @ManyToMany
-    @Fetch(FetchMode.JOIN)
-    private List<Role> roles;
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Set<Role> roles;
 
     public User() {
     }
 
-    public User(String password, String name, String surname, int age, String city, String username, List<Role> roles) {
+    public User(String password, String name, String surname, int age, String city, String username, Set<Role> roles) {
         this.password = password;
         this.name = name;
         this.surname = surname;
@@ -53,6 +49,9 @@ public class User implements UserDetails {
         this.city = city;
         this.username = username;
         this.roles = roles;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public long getId() {
@@ -95,10 +94,22 @@ public class User implements UserDetails {
         this.city = city;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(r -> new SimpleGrantedAuthority(r.getName()))
-                .collect(Collectors.toList());
+        return roles;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -126,4 +137,16 @@ public class User implements UserDetails {
         return true;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id == user.id && age == user.age && Objects.equals(password, user.password) && Objects.equals(name, user.name) && Objects.equals(surname, user.surname) && Objects.equals(city, user.city) && Objects.equals(username, user.username) && Objects.equals(roles, user.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, password, name, surname, age, city, username, roles);
+    }
 }

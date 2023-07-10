@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -66,7 +67,8 @@ public class AdminController {
     @GetMapping("/admin/edit/{id}")
     public String updateUserForm(@PathVariable("id") Long id, Model model) {
         User user = userService.getUserById(id);
-        user.setPassword("");
+        String encodedPassword = new BCryptPasswordEncoder().encode(user.getPassword());
+        user.setPassword(encodedPassword);
         model.addAttribute("user", user);
         List<Role> allRoles = roleService.getAllRoles();
         model.addAttribute("roleSelect", allRoles);
