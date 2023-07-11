@@ -23,14 +23,11 @@ public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
 
-    private final PasswordEncoder passwordEncoder;
-
     @Autowired
-    public AdminController(UserService userService, RoleService roleService, @Lazy PasswordEncoder passwordEncoder) {
+    public AdminController(UserService userService, RoleService roleService) {
 
         this.userService = userService;
         this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/admin")
@@ -67,8 +64,6 @@ public class AdminController {
     @GetMapping("/admin/edit/{id}")
     public String updateUserForm(@PathVariable("id") Long id, Model model) {
         User user = userService.getUserById(id);
-        String encodedPassword = new BCryptPasswordEncoder().encode(user.getPassword());
-        user.setPassword(encodedPassword);
         model.addAttribute("user", user);
         List<Role> allRoles = roleService.getAllRoles();
         model.addAttribute("roleSelect", allRoles);
